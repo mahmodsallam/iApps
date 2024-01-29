@@ -1,7 +1,7 @@
 ## Requirements
 
 - Use Kotlin as a language, Kotlin Flows and Google’s architecture approach including MVVM and
-  Repositories,
+  Repositories. 
   I have used the following architecture
   <img src="images/architecture.png" width="250px" />
 
@@ -58,7 +58,7 @@
   larger screens
   <img src="images/onelinedata.png" width="250px" />
   <img src="images/largerscreens.png" width="250px" />
-
+  
 - Each item should display it’s image with a description under it
   <img src="images/onelinedata.png" width="250px" />
 
