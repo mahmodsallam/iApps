@@ -55,11 +55,12 @@
 
 <p>
 - Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on  larger screens
-  <img src="images/onelinedata.png" width="250px" /> | <img src="images/largerscreens.png" width="250px" /> 
+  <img src="images/onelinedata.png" width="425px" /> | <img src="images/largerscreens.png" width="425px" /> 
 </p>
 <p>
 - Each item should display it’s image with a description under it
-  <img src="images/onelinedata.png" width="250px" />
+ 
+  As shown in the above screen shots
 </p>
 
 - Click on the item should open the link in an external browser
