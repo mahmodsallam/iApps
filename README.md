@@ -56,18 +56,19 @@
 
 - Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on
   larger screens
-  <img src="images/one line data.png" width="250px" />
-  <img src="images/larger screens.png" width="250px" />
+  <img src="images/onelinedata.png" width="250px" />
+  <img src="images/largerscreens.png" width="250px" />
 
 - Each item should display it’s image with a description under it
-  <img src="images/one line data.png" width="250px" />
+  <img src="images/onelinedata.png" width="250px" />
 
 - Click on the item should open the link in an external browser
    ```
     private fun showDetail(item: ResponseModel.Item) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
         startActivity(browserIntent)
-    }```
+    }
+  ```
 
 
 - Sort the data by the published field from the data
@@ -75,7 +76,9 @@
  ```
     val data = resource.map {
         it.valueOrNull?.items?.sortedBy { item: ResponseModel.Item? -> item?.published }.orEmpty()
-    } ```
+    }
+   ```
+    
 
 ## Libraries
 * [kotlin](https://kotlinlang.org/)
