@@ -1,151 +1,81 @@
-# Android MVVM sample app that uses kotlin coroutines flow (without LiveData)
-This is a sample app that uses kotlin coroutines [flow](https://kotlinlang.org/docs/reference/coroutines/flow.html).
+## Requirements
 
-It is MVVM Architecture without [LiveData](https://developer.android.com/topic/libraries/architecture/livedata).
+- Use Kotlin as a language, Kotlin Flows and Google’s architecture approach including MVVM and
+  Repositories,
+  I have used the following architecture
+  <img src="images/architecture.png" width="250px" />
 
-There is a user search feature on Github.
+- Fetch the data and cache it so it’s available offline - reload the data on each app start too
+  I have two interceptor one used while we have network access and fetch the data from the API, And
+  offline interceptor fetch data from the cache
 
-## Screenshot
-top|detail
-:--:|:--:
-<img src="images/screenshot1.png" width="250px" />|<img src="images/screenshot2.png" width="250px" />
-
-## Architecture
-<img src="images/architecture.png" width="250px" />
-
-### ViewModel -> View
-Use kotlin coroutines flow with [StateFlow](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-state-flow/).
-
-After transformed to hot stream with [ViewModelScope](https://developer.android.com/topic/libraries/architecture/coroutines#viewmodelscope), bind to view with [LifecycleScope](https://developer.android.com/topic/libraries/architecture/coroutines#lifecyclescope).
-
-```kotlin
-class TopViewModel(
-    private val repository: RepoRepository
-): ViewModel() {
-    private val resource = repository
-        .getRepoList("Google")
-        .stateIn(viewModelScope, SharingStarted.Eagerly, Resource.Loading)
-    val data = resource.map { it.valueOrNull.orEmpty() }
-}
-```
-```kotlin
-inline fun <T> AppCompatActivity.bind(
-    source: Flow<T>,
-    crossinline action: (T) -> Unit
-) {
-    source.onEach { action.invoke(it) }
-        .launchIn(lifecycleScope)
-}
-```
-```kotlin
-class TopActivity : AppCompatActivity() {
-    private val viewModel: TopViewModel by viewModel()
-
-    private lateinit var binding: ActivityTopBinding
-    private lateinit var adapter: RepoAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_top)
-        adapter = RepoAdapter()
-
-        bind(viewModel.data) {
-            adapter.setList(it)
+ ```` 
+ single {
+        fun hasNetwork(): Boolean {
+            val connectivityManager =
+                androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
+            return activeNetwork != null && activeNetwork.isConnected
         }
-    }
-}
-```
 
-### View -> ViewModel
-Call a ViewModel function, and emit to [MutableSharedFlow](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-mutable-shared-flow/).
-
-```kotlin
-class TopViewModel(
-    private val repository: RepoRepository
-) : ViewModel() {
-    private val submitEvent = MutableSharedFlow<Unit>()
-    private val resource = submitEvent
-        .flatMapLatest { repository.getRepoList("Google") }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, Resource.Loading)
-
-    fun submit() {
-        viewModelScope.launch {
-            submitEvent.emit(Unit)
+        val onlineInterceptor = Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+            val maxAge = 60 // read from cache for 60 seconds even if there is internet connection
+            response.newBuilder()
+                .header("Cache-Control", "public, max-age=$maxAge")
+                .removeHeader("Pragma")
+                .build()
         }
-    }
-}
-```
-```kotlin
-class TopActivity : AppCompatActivity() {
-    private val viewModel: TopViewModel by viewModel()
 
-    private lateinit var binding: ActivityTopBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_top)
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.submit()
-                return false
+        val offlineInterceptor = Interceptor { chain ->
+            var request: Request = chain.request()
+            if (!hasNetwork()) {
+                val maxStale = 60 * 60 * 24 * 30 // Offline cache available for 30 days
+                request = request.newBuilder()
+                    .header("Cache-Control", "public, only-if-cached, max-stale=$maxStale")
+                    .removeHeader("Pragma")
+                    .build()
             }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return false
-            }
-        })
-    }
-}
-```
-
-### View <-> ViewModel (2-way data binding)
-Combine the above two.
-
-```kotlin
-class TopViewModel(
-    private val repository: RepoRepository
-) : ViewModel() {
-    private val _userName = MutableStateFlow("Google")
-    val userName: Flow<String> = _userName
-
-    fun setUserName(userName: String) {
-        _userName.value = userName
-    }
-}
-```
-```kotlin
-class TopActivity : AppCompatActivity() {
-    private val viewModel: TopViewModel by viewModel()
-
-    private lateinit var binding: ActivityTopBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_top)
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.setUserName(newText.orEmpty())
-                return false
-            }
-        })
-
-        bind(viewModel.userName) {
-            val current = binding.searchView.query.toString()
-            // Need to compare with current value
-            if (current != it) {
-                setQuery(query, false)
-            }
+            chain.proceed(request)
         }
-    }
-}
-```
+
+        val cacheSize = 10 * 1024 * 1024 // 10 MB
+        val cache = Cache(androidContext().cacheDir, cacheSize.toLong())
+
+        OkHttpClient.Builder() // .addInterceptor(provideHttpLoggingInterceptor()) // For HTTP request & Response data logging
+            .addInterceptor(offlineInterceptor)
+            .addNetworkInterceptor(onlineInterceptor)
+            .cache(cache)
+            .build()
+    } 
+
+````
+
+- Layouts should be done in XML - not Jetpack Compose.
+  I have build the UI using the XML
+
+- Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on
+  larger screens
+  <img src="images/one line data.png" width="250px" />
+  <img src="images/larger screens.png" width="250px" />
+
+- Each item should display it’s image with a description under it
+  <img src="images/one line data.png" width="250px" />
+
+- Click on the item should open the link in an external browser
+   ```
+    private fun showDetail(item: ResponseModel.Item) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
+        startActivity(browserIntent)
+    }```
+
+
+- Sort the data by the published field from the data
+
+ ```
+    val data = resource.map {
+        it.valueOrNull?.items?.sortedBy { item: ResponseModel.Item? -> item?.published }.orEmpty()
+    } ```
 
 ## Libraries
 * [kotlin](https://kotlinlang.org/)

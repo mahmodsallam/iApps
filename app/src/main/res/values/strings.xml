@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">flow-mvvm-sample</string>
-    <string name="user_name">ユーザ名</string>
-    <string name="error_message">エラーが発生しました。</string>
-    <string name="retry">再試行</string>
+    <string name="app_name">iApps</string>
+    <string name="error_message">Network error</string>
+    <string name="retry">Retry</string>
 </resources>
