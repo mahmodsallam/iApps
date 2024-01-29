@@ -1,8 +1,7 @@
 ## Requirements
 
 - Use Kotlin as a language, Kotlin Flows and Google’s architecture approach including MVVM and
-  Repositories. 
-  I have used the following architecture
+  Repositories.
   <img src="images/architecture.png" width="250px" />
 
 - Fetch the data and cache it so it’s available offline - reload the data on each app start too
@@ -54,10 +53,8 @@
 - Layouts should be done in XML - not Jetpack Compose.
   I have build the UI using the XML
 
-- Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on
-  larger screens
-  <img src="images/onelinedata.png" width="250px" />
-  <img src="images/largerscreens.png" width="250px" />
+- Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on  larger screens
+  <img src="images/onelinedata.png" width="250px" /> | <img src="images/largerscreens.png" width="250px" />
   
 - Each item should display it’s image with a description under it
   <img src="images/onelinedata.png" width="250px" />
