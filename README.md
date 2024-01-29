@@ -53,11 +53,14 @@
 - Layouts should be done in XML - not Jetpack Compose.
   I have build the UI using the XML
 
+<p>
 - Display the data in a vertical RecyclerView list - one column on smartphones and 3 columns on  larger screens
-  <img src="images/onelinedata.png" width="250px" /> | <img src="images/largerscreens.png" width="250px" />
-  
+  <img src="images/onelinedata.png" width="250px" /> | <img src="images/largerscreens.png" width="250px" /> 
+</p>
+<p>
 - Each item should display it’s image with a description under it
   <img src="images/onelinedata.png" width="250px" />
+</p>
 
 - Click on the item should open the link in an external browser
    ```
@@ -67,7 +70,6 @@
     }
   ```
 
-
 - Sort the data by the published field from the data
 
  ```
@@ -75,16 +77,16 @@
         it.valueOrNull?.items?.sortedBy { item: ResponseModel.Item? -> item?.published }.orEmpty()
     }
    ```
-    
 
 ## Libraries
+
 * [kotlin](https://kotlinlang.org/)
-  * [kotlin coroutines](https://github.com/Kotlin/kotlinx.coroutines)
+    * [kotlin coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 * [androidx](https://developer.android.com/jetpack/androidx)
-  * [appcompat](https://developer.android.com/jetpack/androidx/releases/appcompat)
-  * [android ktx](https://developer.android.com/kotlin/ktx)
-  * [constraintlayout](https://developer.android.com/reference/android/support/constraint/ConstraintLayout)
-  * [lifecycle](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+    * [appcompat](https://developer.android.com/jetpack/androidx/releases/appcompat)
+    * [android ktx](https://developer.android.com/kotlin/ktx)
+    * [constraintlayout](https://developer.android.com/reference/android/support/constraint/ConstraintLayout)
+    * [lifecycle](https://developer.android.com/jetpack/androidx/releases/lifecycle)
 * [material-components](https://github.com/material-components/material-components-android)
 * [coil](https://github.com/coil-kt/coil)
 * [koin](https://github.com/InsertKoinIO/koin)
